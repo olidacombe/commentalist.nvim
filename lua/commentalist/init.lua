@@ -1,3 +1,5 @@
+local comment_api = require("Comment.api")
+
 local M = {}
 
 local out = {}
@@ -27,21 +29,33 @@ local figlet = function(string, font, callback)
     shell_render_job(cmdline_args, callback)
 end
 
+local uncomment = function(line1, line2)
+    -- TODO just uncomment either type, and not error
+    -- when an uncomment fails (because it wasn't a comment
+    -- or a particular type of comment
+    comment_api.uncomment.linewise.count(line2 - line1 + 1)
+end
+
+local comment = function(n_lines)
+    comment_api.comment.blockwise.count(n_lines)
+end
+
 M.comment = function(opts)
-    --P(opts)
     local line1, line2 = opts.line1, opts.line2
+
+    -- Strip comments first
+    uncomment(line1, line2)
+
     local buf = vim.api.nvim_get_current_buf()
     -- nvi_buf_get_lines Indexing is zero-based, end-exclusive.
     local lines = vim.api.nvim_buf_get_lines(buf, line1 - 1, line2, false)
     lines = table.concat(lines, "\n")
-    P(lines)
     -- TODO offer all renderers, not just figlet
     figlet(lines, opts.fargs[1], function(output)
         vim.api.nvim_buf_set_lines(buf, line1, line2, false, output)
+        -- TODO a more robust count of the output lines
+        comment(#output)
     end)
 end
 
 return M
-
--- hey
--- hello
