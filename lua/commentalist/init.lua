@@ -29,33 +29,41 @@ local figlet = function(string, font, callback)
     shell_render_job(cmdline_args, callback)
 end
 
-local uncomment = function(line1, line2)
+local uncomment = function(n_lines)
     -- TODO just uncomment either type, and not error
     -- when an uncomment fails (because it wasn't a comment
     -- or a particular type of comment
-    comment_api.uncomment.linewise.count(line2 - line1 + 1)
+    comment_api.uncomment.linewise.count(n_lines)
 end
 
 local comment = function(n_lines)
-    comment_api.comment.blockwise.count(n_lines)
+    comment_api.comment.linewise.count(n_lines)
 end
 
 M.comment = function(opts)
-    local line1, line2 = opts.line1, opts.line2
+    local bufnr, line1, line2 = opts.bufnr, opts.line1, opts.line2
 
     -- Strip comments first
-    uncomment(line1, line2)
+    vim.api.nvim_buf_call(bufnr, function()
+        uncomment(line2 - line1 + 1)
+    end)
 
-    local buf = vim.api.nvim_get_current_buf()
     -- nvi_buf_get_lines Indexing is zero-based, end-exclusive.
-    local lines = vim.api.nvim_buf_get_lines(buf, line1 - 1, line2, false)
+    local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
     lines = table.concat(lines, "\n")
     -- TODO offer all renderers, not just figlet
     figlet(lines, opts.fargs[1], function(output)
-        vim.api.nvim_buf_set_lines(buf, line1, line2, false, output)
+        vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, output)
         -- TODO a more robust count of the output lines
-        comment(#output)
+        vim.api.nvim_buf_call(bufnr, function()
+            comment(vim.api.nvim_buf_line_count(0))
+        end)
+        -- comment(#output)
     end)
+end
+
+M.bla = function(opts)
+    vim.api.nvim_buf_set_lines(opts.bufnr, -1, -1, false, { "something", "nice" })
 end
 
 return M
