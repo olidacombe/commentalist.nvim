@@ -7,12 +7,12 @@ local action_state = require "telescope.actions.state"
 
 local commentalist = require("commentalist")
 
-local fonts = function(opts)
-    -- opts = opts or {}
-    local line1, line2 = opts.line1, opts.line2
+local M = {}
 
-    local buf = vim.api.nvim_get_current_buf()
-    -- nvi_buf_get_lines Indexing is zero-based, end-exclusive.
+M.fonts = function(opts)
+    local buf, line1, line2 = opts.bufnr, opts.line1, opts.line2
+
+    -- nvi_buf_get_lines Indexing is __zero-based__, end-exclusive.
     local lines = vim.api.nvim_buf_get_lines(buf, line1 - 1, line2, false)
 
     -- preserve file type for comment specifics
@@ -39,15 +39,16 @@ local fonts = function(opts)
                 -- TODO really this condition?
                 if entry then
                     local bufnr = self.state.bufnr
+                    local font = entry[1]
                     vim.api.nvim_buf_call(bufnr, function()
                         vim.bo.filetype = filetype
                     end)
                     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
                     commentalist.comment({
                         bufnr = bufnr,
-                        line1 = line1,
-                        line2 = line2,
-                        fargs = { entry[1] }
+                        line1 = 1,
+                        line2 = #lines,
+                        fargs = { font }
                     })
                 end
             end
@@ -55,8 +56,4 @@ local fonts = function(opts)
     }):find()
 end
 
--- to execute the function
-fonts({ line1 = -2, line2 = -1, fargs = {} })
-
--- some text
--- some more text
+return M

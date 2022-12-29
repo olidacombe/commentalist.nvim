@@ -41,6 +41,17 @@ local comment = function(n_lines)
 end
 
 M.comment = function(opts)
+    local font = opts.fargs[1]
+    opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+    -- if no font has been sepecified, let the user select one
+    if not font then
+        -- TODO picker comes from config created at setup,
+        -- and may not be telescope
+        require("commentalist.telescope").fonts(opts)
+        return
+    end
+
+    -- Otherwise we've been ginen a font, act
     local bufnr, line1, line2 = opts.bufnr, opts.line1, opts.line2
 
     -- Strip comments first
@@ -51,19 +62,15 @@ M.comment = function(opts)
     -- nvi_buf_get_lines Indexing is zero-based, end-exclusive.
     local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
     lines = table.concat(lines, "\n")
+
     -- TODO offer all renderers, not just figlet
-    figlet(lines, opts.fargs[1], function(output)
+    figlet(lines, font, function(output)
         vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, output)
         -- TODO a more robust count of the output lines
         vim.api.nvim_buf_call(bufnr, function()
-            comment(vim.api.nvim_buf_line_count(0))
+            comment(#output)
         end)
-        -- comment(#output)
     end)
-end
-
-M.bla = function(opts)
-    vim.api.nvim_buf_set_lines(opts.bufnr, -1, -1, false, { "something", "nice" })
 end
 
 return M
