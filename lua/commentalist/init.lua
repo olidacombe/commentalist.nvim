@@ -71,8 +71,13 @@ local comment = function(n_lines)
 end
 
 M.comment = function(opts)
-    local font = opts.fargs[1]
+    opts = opts or {}
+    -- get variables
     opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+    local fargs = opts.fargs or {}
+    local font = fargs[1]
+    opts.line1 = opts.line1 or 1
+    opts.line2 = opts.line2 or -1
     -- if no font has been sepecified, let the user select one
     if not font then
         -- TODO picker comes from config created at setup,
@@ -80,8 +85,8 @@ M.comment = function(opts)
         require("commentalist.telescope").fonts(opts)
         return
     end
-
     -- Otherwise we've been ginen a font, act
+
     local bufnr, line1, line2 = opts.bufnr, opts.line1, opts.line2
 
     -- Strip comments first
