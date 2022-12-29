@@ -1,6 +1,10 @@
 local comment_api = require("Comment.api")
 
-local M = {}
+local M = {
+    renderers = {
+        figlet = {},
+    },
+}
 
 local out = {}
 
@@ -16,6 +20,32 @@ local shell_render_job = function(cmdline_args, callback)
             callback(out[id])
         end
     })
+end
+
+local filter_figlet_font_list = function(figlist)
+    local fonts_start = false
+    local fonts = {}
+    for _, s in ipairs(figlist) do repeat
+            if s:find("Figlet fonts in this directory:") then
+                fonts_start = true
+                break
+            end
+            if not fonts_start then
+                break
+            end
+            if s:find("Figlet control files in this directory:") then
+                return fonts
+            end
+            table.insert(fonts, s)
+        until true
+    end
+    return fonts
+end
+
+M.setup = function()
+    shell_render_job({ "figlist" }, function(figlist)
+        M.renderers.figlet = filter_figlet_font_list(figlist)
+    end)
 end
 
 local figlet = function(string, font, callback)

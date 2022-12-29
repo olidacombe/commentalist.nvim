@@ -21,7 +21,7 @@ M.fonts = function(opts)
     pickers.new(opts, {
         prompt_title = "fonts",
         finder = finders.new_table {
-            results = { "doom", "block", "moscow", "sblood", }
+            results = commentalist.renderers.figlet,
         },
         sorter = conf.generic_sorter(opts),
         attach_mappings = function(prompt_bufnr, map)
