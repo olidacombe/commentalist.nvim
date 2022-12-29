@@ -2,6 +2,8 @@
 
 This plugin aims to trivialize the making of bombastic ascii comments.
 
+![Preview](https://user-images.githubusercontent.com/1752435/209985337-77a085de-e0d6-43ce-bd87-8bff2f4ca0ae.gif)
+
 Currently supporting the following engines:
 
 + figlet
