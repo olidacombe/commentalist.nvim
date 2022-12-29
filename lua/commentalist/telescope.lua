@@ -38,7 +38,7 @@ M.fonts = function(opts)
             return true
         end,
         previewer = previewers.new_buffer_previewer({
-            title = "Preview dev",
+            title = "Preview",
             define_preview = function(self, entry, status)
                 -- TODO really this condition?
                 if entry then
