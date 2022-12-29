@@ -31,7 +31,7 @@ less worth using without it.
 Call the setup funtion somewhere in your configs
 
 ```lua
-require("commentalist").setup
+require("commentalist").setup()
 
 -- optionally add a keymap
 vim.keymap.set({ "n", "v" }, "<leader>mm", ":Commentalist<CR>")
