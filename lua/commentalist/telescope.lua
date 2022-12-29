@@ -28,8 +28,12 @@ M.fonts = function(opts)
             actions.select_default:replace(function()
                 actions.close(prompt_bufnr)
                 local selection = action_state.get_selected_entry()
-                -- P(selection)
-                -- vim.api.nvim_put({ selection[1] }, "", false, true)
+                -- TODO not be so wasteful as to call the renderen again
+                -- (and previewer caching while we're at it)
+                -- set the chosen font in options
+                opts.fargs = { selection[1] }
+                -- commit the selected comment
+                commentalist.comment(opts)
             end)
             return true
         end,
