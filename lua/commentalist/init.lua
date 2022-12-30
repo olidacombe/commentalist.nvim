@@ -92,7 +92,7 @@ M.comment = function(opts)
         uncomment(line2 - line1 + 1)
     end)
 
-    -- nvi_buf_get_lines Indexing is zero-based, end-exclusive.
+    -- nvim_buf_get_lines Indexing is zero-based, end-exclusive.
     local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
     lines = table.concat(lines, "\n")
 

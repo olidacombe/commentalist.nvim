@@ -8,6 +8,7 @@ local fixtures = {
     comments_only_sh = {},
     hello_world_cpp = {},
     lib_rs = {},
+    raw_sh = {},
 }
 
 local assert_fixture_expectation = function(fixture)
@@ -41,21 +42,54 @@ describe("comment", function()
     end)
 
     it("comments whole buffer by default", function()
+        local orig = load_fixture_to_new_buffer("raw.sh")
+        local commented = load_fixture_to_new_buffer("raw_commented.sh")
+        vim.api.nvim_buf_call(orig, function()
+            vim.bo.filetype = "sh"
+        end)
+        comment({ bufnr = orig, fargs = { "banner" } })
+        assert_buffers_are_equal(commented, orig)
+    end)
+
+    it("re-comments commented text", function()
         local orig = load_fixture_to_new_buffer("comments_only.sh")
+        vim.api.nvim_buf_call(orig, function()
+            vim.bo.filetype = "sh"
+        end)
         local commented = load_fixture_to_new_buffer("comments_only_commented.sh")
         comment({ bufnr = orig, fargs = { "banner" } })
         assert_buffers_are_equal(commented, orig)
     end)
 
     it("comments a selection", function()
-        comment({ bufnr = fixtures.hello_world_cpp.orig_buf, line1 = 3, line2 = 4, fargs = { "banner" } })
-        assert_fixture_expectation("hello_world_cpp")
+        local orig = load_fixture_to_new_buffer("hello_world.cpp")
+        vim.api.nvim_buf_call(orig, function()
+            vim.bo.filetype = "cpp"
+        end)
+        vim.api.nvim_win_set_buf(0, orig)
+        vim.api.nvim_win_set_cursor(0, { 3, 0 })
+        comment({ bufnr = orig, line1 = 3, line2 = 4, fargs = { "banner" } })
+        local commented = load_fixture_to_new_buffer("hello_world_commented.cpp")
+        assert_buffers_are_equal(commented, orig)
     end)
 
     it("comments different types of file", function()
-        comment({ bufnr = fixtures.lib_rs.orig_buf, line1 = 1, line2 = 1, fargs = { "banner" } })
-        assert_fixture_expectation("lib_rs")
-        comment({ bufnr = fixtures.ba_sh.orig_buf, line1 = 5, line2 = 6, fargs = { "banner" } })
-        assert_fixture_expectation("ba_sh")
+        local orig = load_fixture_to_new_buffer("lib.rs")
+        vim.api.nvim_buf_call(orig, function()
+            vim.bo.filetype = "rust"
+        end)
+        local commented = load_fixture_to_new_buffer("lib_commented.rs")
+        comment({ bufnr = orig, line1 = 1, line2 = 1, fargs = { "banner" } })
+        assert_buffers_are_equal(commented, orig)
+
+        orig = load_fixture_to_new_buffer("ba.sh")
+        vim.api.nvim_buf_call(orig, function()
+            vim.bo.filetype = "sh"
+        end)
+        vim.api.nvim_win_set_buf(0, orig)
+        vim.api.nvim_win_set_cursor(0, { 5, 0 })
+        comment({ bufnr = orig, line1 = 5, line2 = 6, fargs = { "banner" } })
+        local commented = load_fixture_to_new_buffer("ba_commented.sh")
+        assert_buffers_are_equal(commented, orig)
     end)
 end)

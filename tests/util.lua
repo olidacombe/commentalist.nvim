@@ -19,7 +19,7 @@ end
 M.load_fixture_to_new_buffer = function(fixture)
     local buf = vim.api.nvim_create_buf(false, false)
     local lines = M.load_fixture_as_lines(fixture)
-    vim.api.nvim_buf_set_lines(buf, 1, -1, false, lines)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
     return buf
 end
 
