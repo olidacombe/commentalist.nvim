@@ -4,6 +4,7 @@ local load_fixture_to_new_buffer = require("tests.util").load_fixture_to_new_buf
 local assert_buffers_are_equal = require("tests.util").assert_buffers_are_equal
 
 local fixtures = {
+    ba_sh = {},
     comments_only_sh = {},
     hello_world_cpp = {},
     lib_rs = {},
@@ -11,7 +12,7 @@ local fixtures = {
 
 local assert_fixture_expectation = function(fixture)
     local f = fixtures[fixture]
-    assert_buffers_are_equal(f.orig_buf, f.commented_buf)
+    assert_buffers_are_equal(f.commented_buf, f.orig_buf)
 end
 
 describe("comment", function()
@@ -44,16 +45,19 @@ describe("comment", function()
     end)
 
     it("comments whole buffer by default", function()
-        assert_fixture_expectation("hello_world_cpp")
+        comment({ bufnr = fixtures.comments_only_sh.orig_buf, fargs = { "banner" } })
+        assert_fixture_expectation("comments_only_sh")
     end)
 
     it("comments a selection", function()
-        -- todo
-        assert(false)
+        comment({ bufnr = fixtures.hello_world_cpp.orig_buf, line1 = 3, line2 = 4, fargs = { "banner" } })
+        assert_fixture_expectation("hello_world_cpp")
     end)
 
     it("comments different types of file", function()
-        -- todo
-        assert(false)
+        comment({ bufnr = fixtures.lib_rs.orig_buf, line1 = 1, line2 = 1, fargs = { "banner" } })
+        assert_fixture_expectation("lib_rs")
+        comment({ bufnr = fixtures.ba_sh.orig_buf, line1 = 5, line2 = 6, fargs = { "banner" } })
+        assert_fixture_expectation("ba_sh")
     end)
 end)
