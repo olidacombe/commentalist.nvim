@@ -16,10 +16,6 @@ local assert_fixture_expectation = function(fixture)
 end
 
 describe("comment", function()
-    it("runs", function()
-        comment()
-    end)
-
     before_each(function()
         for fixture, t in pairs(fixtures) do
             -- The "original" buffer, which our tests should
@@ -45,8 +41,10 @@ describe("comment", function()
     end)
 
     it("comments whole buffer by default", function()
-        comment({ bufnr = fixtures.comments_only_sh.orig_buf, fargs = { "banner" } })
-        assert_fixture_expectation("comments_only_sh")
+        local orig = load_fixture_to_new_buffer("comments_only.sh")
+        local commented = load_fixture_to_new_buffer("comments_only_commented.sh")
+        comment({ bufnr = orig, fargs = { "banner" } })
+        assert_buffers_are_equal(commented, orig)
     end)
 
     it("comments a selection", function()

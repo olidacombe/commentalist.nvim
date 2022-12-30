@@ -1,4 +1,5 @@
 local comment_api = require("Comment.api")
+local Job = require("plenary.job")
 
 local M = {
     renderers = {
@@ -6,20 +7,17 @@ local M = {
     },
 }
 
-local out = {}
-
 local shell_render_job = function(cmdline_args, callback)
-    vim.fn.jobstart(cmdline_args, {
-        on_stdout = function(id, data, _)
-            out[id] = out[id] or {}
-            for _, v in ipairs(data) do
-                table.insert(out[id], v)
-            end
-        end,
-        on_exit   = function(id, _, _)
-            callback(out[id])
+    local command = table.remove(cmdline_args, 1)
+    local job = Job:new({
+        command = command,
+        args    = cmdline_args,
+        on_exit = callback and function(j, _)
+            callback(j:result())
         end
     })
+    job:start()
+    return job
 end
 
 local filter_figlet_font_list = function(figlist)
@@ -48,7 +46,7 @@ M.setup = function()
     end)
 end
 
-local figlet = function(string, font, callback)
+local figlet = function(string, font)
     local cmdline_args = { "figlet" }
     if font then
         table.insert(cmdline_args, "-f")
@@ -56,7 +54,7 @@ local figlet = function(string, font, callback)
     end
     table.insert(cmdline_args, "--")
     table.insert(cmdline_args, string)
-    shell_render_job(cmdline_args, callback)
+    return shell_render_job(cmdline_args, nil)
 end
 
 local uncomment = function(n_lines)
@@ -99,12 +97,13 @@ M.comment = function(opts)
     lines = table.concat(lines, "\n")
 
     -- TODO offer all renderers, not just figlet
-    figlet(lines, font, function(output)
-        vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, output)
-        -- TODO a more robust count of the output lines
-        vim.api.nvim_buf_call(bufnr, function()
-            comment(#output)
-        end)
+    local ascii_render = figlet(lines, font)
+    ascii_render:sync()
+    local ascii = ascii_render:result()
+    vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, ascii)
+    -- TODO a more robust count of the output lines
+    vim.api.nvim_buf_call(bufnr, function()
+        comment(#ascii)
     end)
 end
 

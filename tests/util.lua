@@ -31,9 +31,4 @@ M.assert_buffers_are_equal = function(buf1, buf2)
     assert.are.same(M.buffer_as_lines(buf1), M.buffer_as_lines(buf2))
 end
 
--- load_fixture_to_buffer("hello_world.cpp")
---
--- P(debug.getinfo(1))0
--- vim.api.nvim_buf_set_lines(0, -1, -1, false, file_lines("tests/fixtures/hello_world.cpp"))
-
 return M
