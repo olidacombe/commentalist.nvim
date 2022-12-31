@@ -16,15 +16,17 @@ local assert_fixture_expectation = function(fixture)
     assert_buffers_are_equal(f.commented_buf, f.orig_buf)
 end
 
+-- TODO move to tests/fixtures/init.lua
 local Fixture = {}
 local CommentedFixture = {}
 
-function Fixture.new(fixture)
+function Fixture:new(fixture)
     local obj = {}
     obj.buffer = load_fixture_to_new_buffer(fixture)
     local filename = fixture:gsub('\\.', "_commented.")
     obj.expected_buffer = load_fixture_to_new_buffer(filename)
-    setmetatable(obj, Fixture)
+    setmetatable(obj, self)
+    self.__index = self
     return obj
 end
 
@@ -37,8 +39,14 @@ function Fixture:comment(args)
         opts[k] = v
     end
     comment(opts)
-    setmetatable(self, CommentedFixture)
-    return self
+    return CommentedFixture:new(self)
+end
+
+function CommentedFixture:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
 end
 
 function CommentedFixture:assert()
@@ -72,7 +80,7 @@ describe("comment", function()
     end)
 
     it("comments whole buffer by default", function()
-        Fixture.new("raw.sh"):comment():assert()
+        Fixture:new("raw.sh"):comment():assert()
         local orig = load_fixture_to_new_buffer("raw.sh")
         local commented = load_fixture_to_new_buffer("raw_commented.sh")
         vim.api.nvim_buf_call(orig, function()
