@@ -16,6 +16,37 @@ local assert_fixture_expectation = function(fixture)
     assert_buffers_are_equal(f.commented_buf, f.orig_buf)
 end
 
+local Fixture = {}
+local CommentedFixture = {}
+
+function Fixture.new(fixture)
+    local obj = {}
+    local filename = fixture:gsub("(.*)_", "%1.")
+    obj.buffer = load_fixture_to_new_buffer(filename)
+    filename = fixture:gsub("(.*)_", "%1_commented.")
+    obj.expected_buffer = load_fixture_to_new_buffer(filename)
+    setmetatable(obj, Fixture)
+    return obj
+end
+
+function Fixture:comment(args)
+    local opts = {
+        bufnr = self.buffer,
+        fargs = { "banner" }
+    }
+    for k, v in pairs(args or {}) do
+        opts[k] = v
+    end
+    comment(opts)
+    setmetatable(self, CommentedFixture)
+    return self
+end
+
+function CommentedFixture:assert()
+    -- raise if modified buffer is not equal to expected buffer
+    assert_buffers_are_equal(self.expected_buffer, self.buffer)
+end
+
 describe("comment", function()
     before_each(function()
         for fixture, t in pairs(fixtures) do
@@ -42,6 +73,7 @@ describe("comment", function()
     end)
 
     it("comments whole buffer by default", function()
+        Fixture:new("raw.sh"):comment():assert()
         local orig = load_fixture_to_new_buffer("raw.sh")
         local commented = load_fixture_to_new_buffer("raw_commented.sh")
         vim.api.nvim_buf_call(orig, function()
