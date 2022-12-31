@@ -21,9 +21,8 @@ local CommentedFixture = {}
 
 function Fixture.new(fixture)
     local obj = {}
-    local filename = fixture:gsub("(.*)_", "%1.")
-    obj.buffer = load_fixture_to_new_buffer(filename)
-    filename = fixture:gsub("(.*)_", "%1_commented.")
+    obj.buffer = load_fixture_to_new_buffer(fixture)
+    local filename = fixture:gsub('\\.', "_commented.")
     obj.expected_buffer = load_fixture_to_new_buffer(filename)
     setmetatable(obj, Fixture)
     return obj
@@ -73,7 +72,7 @@ describe("comment", function()
     end)
 
     it("comments whole buffer by default", function()
-        Fixture:new("raw.sh"):comment():assert()
+        Fixture.new("raw.sh"):comment():assert()
         local orig = load_fixture_to_new_buffer("raw.sh")
         local commented = load_fixture_to_new_buffer("raw_commented.sh")
         vim.api.nvim_buf_call(orig, function()
