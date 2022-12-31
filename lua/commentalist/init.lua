@@ -57,15 +57,35 @@ local figlet = function(string, font)
     return shell_render_job(cmdline_args, nil)
 end
 
-local uncomment = function(n_lines)
-    -- TODO just uncomment either type, and not error
-    -- when an uncomment fails (because it wasn't a comment
-    -- or a particular type of comment
-    comment_api.uncomment.linewise.count(n_lines)
+local cursor_stack = function(buf, line, col, callback)
+    local win = 0
+    local orig_buf = vim.api.nvim_get_current_buf()
+    local orig_cursor = vim.api.nvim_win_get_cursor(win)
+
+    if buf then
+        vim.api.nvim_win_set_buf(win, buf)
+    end
+    vim.api.nvim_win_set_cursor(win, { line, col })
+
+    callback()
+
+    vim.api.nvim_win_set_cursor(win, orig_cursor)
+    vim.api.nvim_win_set_buf(win, orig_buf)
 end
 
-local comment = function(n_lines)
-    comment_api.comment.linewise.count(n_lines)
+local uncomment = function(line1, line2)
+    cursor_stack(nil, line1, 0, function()
+        -- TODO just uncomment either type, and not error
+        -- when an uncomment fails (because it wasn't a comment
+        -- or a particular type of comment
+        comment_api.uncomment.linewise.count(line2 - line1 + 1)
+    end)
+end
+
+local comment = function(line1, line2)
+    cursor_stack(nil, line1, 0, function()
+        comment_api.comment.linewise.count(line2 - line1 + 1)
+    end)
 end
 
 M.comment = function(opts)
@@ -89,7 +109,7 @@ M.comment = function(opts)
 
     -- Strip comments first
     vim.api.nvim_buf_call(bufnr, function()
-        uncomment(line2 - line1 + 1)
+        uncomment(line1, line2)
     end)
 
     -- nvim_buf_get_lines Indexing is zero-based, end-exclusive.
@@ -103,7 +123,7 @@ M.comment = function(opts)
     vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, ascii)
     -- TODO a more robust count of the output lines
     vim.api.nvim_buf_call(bufnr, function()
-        comment(#ascii)
+        comment(line1, line1 + #ascii - 1)
     end)
 end
 
