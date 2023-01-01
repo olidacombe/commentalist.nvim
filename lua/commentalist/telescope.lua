@@ -10,7 +10,9 @@ local commentalist = require("commentalist")
 local M = {}
 
 M.fonts = function(opts)
-    local buf, line1, line2 = opts.bufnr, opts.line1, opts.line2
+    local buf = assert(opts.bufnr, "opts.bufnr must be specified")
+    local line1 = assert(opts.line1, "opts.line1 must be specified")
+    local line2 = assert(opts.line2, "opts.line2 must be specified")
 
     -- nvi_buf_get_lines Indexing is __zero-based__, end-exclusive.
     local lines = vim.api.nvim_buf_get_lines(buf, line1 - 1, line2, false)
@@ -28,7 +30,7 @@ M.fonts = function(opts)
             actions.select_default:replace(function()
                 actions.close(prompt_bufnr)
                 local selection = action_state.get_selected_entry()
-                -- TODO not be so wasteful as to call the renderen again
+                -- TODO not be so wasteful as to call the renderer again
                 -- (and previewer caching while we're at it)
                 -- set the chosen font in options
                 opts.fargs = { selection[1] }

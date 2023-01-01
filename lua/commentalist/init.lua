@@ -1,4 +1,5 @@
 local comment_api = require("Comment.api")
+local Job = require("plenary.job")
 
 local M = {
     renderers = {
@@ -6,20 +7,17 @@ local M = {
     },
 }
 
-local out = {}
-
 local shell_render_job = function(cmdline_args, callback)
-    vim.fn.jobstart(cmdline_args, {
-        on_stdout = function(id, data, _)
-            out[id] = out[id] or {}
-            for _, v in ipairs(data) do
-                table.insert(out[id], v)
-            end
-        end,
-        on_exit   = function(id, _, _)
-            callback(out[id])
+    local command = table.remove(cmdline_args, 1)
+    local job = Job:new({
+        command = command,
+        args    = cmdline_args,
+        on_exit = callback and function(j, _)
+            callback(j:result())
         end
     })
+    job:start()
+    return job
 end
 
 local filter_figlet_font_list = function(figlist)
@@ -48,7 +46,7 @@ M.setup = function()
     end)
 end
 
-local figlet = function(string, font, callback)
+local figlet = function(string, font)
     local cmdline_args = { "figlet" }
     if font then
         table.insert(cmdline_args, "-f")
@@ -56,23 +54,48 @@ local figlet = function(string, font, callback)
     end
     table.insert(cmdline_args, "--")
     table.insert(cmdline_args, string)
-    shell_render_job(cmdline_args, callback)
+    return shell_render_job(cmdline_args, nil)
 end
 
-local uncomment = function(n_lines)
-    -- TODO just uncomment either type, and not error
-    -- when an uncomment fails (because it wasn't a comment
-    -- or a particular type of comment
-    comment_api.uncomment.linewise.count(n_lines)
+local cursor_stack = function(buf, line, col, callback)
+    local win = 0
+    local orig_buf = vim.api.nvim_get_current_buf()
+    local orig_cursor = vim.api.nvim_win_get_cursor(win)
+
+    if buf then
+        vim.api.nvim_win_set_buf(win, buf)
+    end
+    vim.api.nvim_win_set_cursor(win, { line, col })
+
+    callback()
+
+    vim.api.nvim_win_set_cursor(win, orig_cursor)
+    vim.api.nvim_win_set_buf(win, orig_buf)
 end
 
-local comment = function(n_lines)
-    comment_api.comment.linewise.count(n_lines)
+local uncomment = function(line1, line2)
+    cursor_stack(nil, line1, 0, function()
+        -- TODO just uncomment either type, and not error
+        -- when an uncomment fails (because it wasn't a comment
+        -- or a particular type of comment
+        comment_api.uncomment.linewise.count(line2 - line1 + 1)
+    end)
+end
+
+local comment = function(line1, line2)
+    cursor_stack(nil, line1, 0, function()
+        comment_api.comment.linewise.count(line2 - line1 + 1)
+    end)
 end
 
 M.comment = function(opts)
-    local font = opts.fargs[1]
+    opts = opts or {}
+    -- get variables
     opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+    local fargs = opts.fargs or {}
+    local font = fargs[1]
+    opts.line1 = opts.line1 or 1
+    opts.line2 = opts.line2 or -1
     -- if no font has been sepecified, let the user select one
     if not font then
         -- TODO picker comes from config created at setup,
@@ -80,26 +103,27 @@ M.comment = function(opts)
         require("commentalist.telescope").fonts(opts)
         return
     end
-
     -- Otherwise we've been ginen a font, act
+
     local bufnr, line1, line2 = opts.bufnr, opts.line1, opts.line2
 
     -- Strip comments first
     vim.api.nvim_buf_call(bufnr, function()
-        uncomment(line2 - line1 + 1)
+        uncomment(line1, line2)
     end)
 
-    -- nvi_buf_get_lines Indexing is zero-based, end-exclusive.
+    -- nvim_buf_get_lines Indexing is zero-based, end-exclusive.
     local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
     lines = table.concat(lines, "\n")
 
     -- TODO offer all renderers, not just figlet
-    figlet(lines, font, function(output)
-        vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, output)
-        -- TODO a more robust count of the output lines
-        vim.api.nvim_buf_call(bufnr, function()
-            comment(#output)
-        end)
+    local ascii_render = figlet(lines, font)
+    ascii_render:sync()
+    local ascii = ascii_render:result()
+    vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, ascii)
+    -- TODO a more robust count of the output lines
+    vim.api.nvim_buf_call(bufnr, function()
+        comment(line1, line1 + #ascii - 1)
     end)
 end
 

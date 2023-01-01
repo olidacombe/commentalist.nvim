@@ -1,5 +1,0 @@
-describe("commentalist", function()
-    it("can be required", function()
-        require("commentalist")
-    end)
-end)
