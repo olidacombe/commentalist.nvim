@@ -83,28 +83,21 @@ describe("comment", function()
         Fixture:new("raw.sh"):comment():assert()
         local orig = load_fixture_to_new_buffer("raw.sh")
         local commented = load_fixture_to_new_buffer("raw_commented.sh")
-        vim.api.nvim_buf_call(orig, function()
-            vim.bo.filetype = "sh"
-        end)
         comment({ bufnr = orig, fargs = { "banner" } })
         assert_buffers_are_equal(commented, orig)
     end)
 
     it("re-comments commented text", function()
+        -- Fixture:new("comments_only.sh"):comment():assert()
         local orig = load_fixture_to_new_buffer("comments_only.sh")
-        vim.api.nvim_buf_call(orig, function()
-            vim.bo.filetype = "sh"
-        end)
         local commented = load_fixture_to_new_buffer("comments_only_commented.sh")
         comment({ bufnr = orig, fargs = { "banner" } })
         assert_buffers_are_equal(commented, orig)
     end)
 
     it("comments a selection", function()
+        -- Fixture:new("comments_only.sh"):comment({ line1 = 3, line2 = 4 }):assert()
         local orig = load_fixture_to_new_buffer("hello_world.cpp")
-        vim.api.nvim_buf_call(orig, function()
-            vim.bo.filetype = "cpp"
-        end)
         comment({ bufnr = orig, line1 = 3, line2 = 4, fargs = { "banner" } })
         local commented = load_fixture_to_new_buffer("hello_world_commented.cpp")
         assert_buffers_are_equal(commented, orig)
@@ -112,17 +105,11 @@ describe("comment", function()
 
     it("comments different types of file", function()
         local orig = load_fixture_to_new_buffer("lib.rs")
-        vim.api.nvim_buf_call(orig, function()
-            vim.bo.filetype = "rust"
-        end)
         local commented = load_fixture_to_new_buffer("lib_commented.rs")
         comment({ bufnr = orig, line1 = 1, line2 = 1, fargs = { "banner" } })
         assert_buffers_are_equal(commented, orig)
 
         orig = load_fixture_to_new_buffer("ba.sh")
-        vim.api.nvim_buf_call(orig, function()
-            vim.bo.filetype = "sh"
-        end)
         comment({ bufnr = orig, line1 = 5, line2 = 6, fargs = { "banner" } })
         local commented = load_fixture_to_new_buffer("ba_commented.sh")
         assert_buffers_are_equal(commented, orig)
