@@ -3,19 +3,6 @@ local comment = commentalist.comment
 local load_fixture_to_new_buffer = require("tests.util").load_fixture_to_new_buffer
 local assert_buffers_are_equal = require("tests.util").assert_buffers_are_equal
 
-local fixtures = {
-    ba_sh = {},
-    comments_only_sh = {},
-    hello_world_cpp = {},
-    lib_rs = {},
-    raw_sh = {},
-}
-
-local assert_fixture_expectation = function(fixture)
-    local f = fixtures[fixture]
-    assert_buffers_are_equal(f.commented_buf, f.orig_buf)
-end
-
 -- TODO move to tests/fixtures/init.lua
 local Fixture = {}
 local CommentedFixture = {}
@@ -23,7 +10,7 @@ local CommentedFixture = {}
 function Fixture:new(fixture)
     local obj = {}
     obj.buffer = load_fixture_to_new_buffer(fixture)
-    local filename = fixture:gsub('\\.', "_commented.")
+    local filename = fixture:gsub('%.', "_commented.")
     obj.expected_buffer = load_fixture_to_new_buffer(filename)
     setmetatable(obj, self)
     self.__index = self
@@ -55,63 +42,20 @@ function CommentedFixture:assert()
 end
 
 describe("comment", function()
-    before_each(function()
-        for fixture, t in pairs(fixtures) do
-            -- The "original" buffer, which our tests should
-            -- mess with and compare with expectations
-            local filename = fixture:gsub("(.*)_", "%1.")
-            t.orig_buf = load_fixture_to_new_buffer(filename)
-            -- This "expected" buffer might never get modified,
-            -- so maybe we'll load it once and clean it up once
-            -- in future
-            filename = fixture:gsub("(.*)_", "%1_commented.")
-            t.commented_buf = load_fixture_to_new_buffer(filename)
-        end
-    end)
-
-    after_each(function()
-        -- clean up all the fixture buffers
-        for _, bufs in pairs(fixtures) do
-            for _, buf in pairs(bufs) do
-                vim.api.nvim_buf_delete(buf, { force = true })
-            end
-            bufs = {}
-        end
-    end)
-
     it("comments whole buffer by default", function()
         Fixture:new("raw.sh"):comment():assert()
-        local orig = load_fixture_to_new_buffer("raw.sh")
-        local commented = load_fixture_to_new_buffer("raw_commented.sh")
-        comment({ bufnr = orig, fargs = { "banner" } })
-        assert_buffers_are_equal(commented, orig)
     end)
 
     it("re-comments commented text", function()
-        -- Fixture:new("comments_only.sh"):comment():assert()
-        local orig = load_fixture_to_new_buffer("comments_only.sh")
-        local commented = load_fixture_to_new_buffer("comments_only_commented.sh")
-        comment({ bufnr = orig, fargs = { "banner" } })
-        assert_buffers_are_equal(commented, orig)
+        Fixture:new("comments_only.sh"):comment():assert()
     end)
 
     it("comments a selection", function()
-        -- Fixture:new("comments_only.sh"):comment({ line1 = 3, line2 = 4 }):assert()
-        local orig = load_fixture_to_new_buffer("hello_world.cpp")
-        comment({ bufnr = orig, line1 = 3, line2 = 4, fargs = { "banner" } })
-        local commented = load_fixture_to_new_buffer("hello_world_commented.cpp")
-        assert_buffers_are_equal(commented, orig)
+        Fixture:new("hello_world.cpp"):comment({ line1 = 3, line2 = 4 }):assert()
     end)
 
     it("comments different types of file", function()
-        local orig = load_fixture_to_new_buffer("lib.rs")
-        local commented = load_fixture_to_new_buffer("lib_commented.rs")
-        comment({ bufnr = orig, line1 = 1, line2 = 1, fargs = { "banner" } })
-        assert_buffers_are_equal(commented, orig)
-
-        orig = load_fixture_to_new_buffer("ba.sh")
-        comment({ bufnr = orig, line1 = 5, line2 = 6, fargs = { "banner" } })
-        local commented = load_fixture_to_new_buffer("ba_commented.sh")
-        assert_buffers_are_equal(commented, orig)
+        Fixture:new("lib.rs"):comment({ line1 = 1, line2 = 1 }):assert()
+        Fixture:new("ba.sh"):comment({ line1 = 5, line2 = 6 }):assert()
     end)
 end)
