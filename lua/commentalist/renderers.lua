@@ -1,5 +1,5 @@
 local M = {
-    renderers = {}
+    _renderers = {}
 }
 
 local noop_renderer = function(lines)
@@ -14,17 +14,17 @@ M._split_renderer_repr = function(repr)
     return renderer, font
 end
 
-M.get_renderer_from_string = function(repr)
+M.get = function(repr)
     local renderer, font = M._split_renderer_repr(repr)
-    renderer = M.renderers[renderer]
+    renderer = M._renderers[renderer]
 
     return renderer and function(lines)
         return renderer(lines, font)
     end or noop_renderer
 end
 
-M.register_renderer = function(name, renderer)
-    M.renderers[name] = renderer
+M.register = function(name, renderer)
+    M._renderers[name] = renderer
 end
 
 return M

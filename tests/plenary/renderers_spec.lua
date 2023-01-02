@@ -1,7 +1,7 @@
-local renderer = require("commentalist.renderer")
+local renderers = require("commentalist.renderers")
 
 describe("split_renderer_repr", function()
-    local split_renderer_repr = renderer._split_renderer_repr
+    local split_renderer_repr = renderers._split_renderer_repr
 
     it("splits `figlet/banner` to `figlet`, `banner`", function()
         local r, f = split_renderer_repr("figlet/banner")
@@ -22,9 +22,9 @@ describe("split_renderer_repr", function()
     end)
 end)
 
-describe("get_renderer_from_string", function()
-    local register_renderer = renderer.register_renderer
-    local get_renderer_from_string = renderer.get_renderer_from_string
+describe("renderers.get", function()
+    local register_renderer = renderers.register
+    local get = renderers.get
 
     before_each(function()
         register_renderer("test", function(lines, font)
@@ -37,14 +37,14 @@ describe("get_renderer_from_string", function()
     end)
 
     it("returns a no-op renderer on miss", function()
-        local renderer = get_renderer_from_string("miss")
+        local renderer = get("miss")
         assert.are.not_same(renderer, nil)
         local lines = { "untouched" }
         assert.are.same(renderer(lines), { "untouched" })
     end)
 
     it("curries the font", function()
-        local renderer = get_renderer_from_string("test/fonty")
+        local renderer = get("test/fonty")
         local lines = { "liney" }
         assert.are.same(renderer(lines), { "fonty:liney" })
     end)
