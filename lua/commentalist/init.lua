@@ -1,24 +1,12 @@
 local comment_api = require("Comment.api")
-local Job = require("plenary.job")
+local fonts = require("commentalist.fonts")
+local renderers = require("commentalist.renderers")
 
 local M = {
     renderers = {
         figlet = {},
     },
 }
-
-local shell_render_job = function(cmdline_args, callback)
-    local command = table.remove(cmdline_args, 1)
-    local job = Job:new({
-        command = command,
-        args    = cmdline_args,
-        on_exit = callback and function(j, _)
-            callback(j:result())
-        end
-    })
-    job:start()
-    return job
-end
 
 local filter_figlet_font_list = function(figlist)
     local fonts_start = false
@@ -34,16 +22,10 @@ local filter_figlet_font_list = function(figlist)
             if s:find("Figlet control files in this directory:") then
                 return fonts
             end
-            table.insert(fonts, s)
+            table.insert(fonts, "figlet/" .. s)
         until true
     end
     return fonts
-end
-
-M.setup = function()
-    shell_render_job({ "figlist" }, function(figlist)
-        M.renderers.figlet = filter_figlet_font_list(figlist)
-    end)
 end
 
 local figlet = function(string, font)
@@ -54,7 +36,31 @@ local figlet = function(string, font)
     end
     table.insert(cmdline_args, "--")
     table.insert(cmdline_args, string)
-    return shell_render_job(cmdline_args, nil)
+    return renderers.shell_render_job(cmdline_args, nil)
+end
+
+M.defaults = {
+    renderers = {
+        blocky = {
+            render = function(lines, _)
+                return lines
+            end
+            -- fonts = function -> table | table | nil
+        },
+        -- TODO move to module
+        figlet = {
+            render = figlet,
+            fonts = M.renderers.figlet
+        }
+    }
+}
+
+M.setup = function(opts)
+    renderers.register("figlet", figlet)
+    renderers.shell_render_job({ "figlist" }, function(figlist)
+        -- M.renderers.figlet = filter_figlet_font_list(figlist)
+        fonts.register(filter_figlet_font_list(figlist))
+    end)
 end
 
 local cursor_stack = function(buf, line, col, callback)
@@ -117,7 +123,8 @@ M.comment = function(opts)
     lines = table.concat(lines, "\n")
 
     -- TODO offer all renderers, not just figlet
-    local ascii_render = figlet(lines, font)
+    -- local ascii_render = figlet(lines, font)
+    local ascii_render = renderers.get(font)(lines)
     ascii_render:sync()
     local ascii = ascii_render:result()
     vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, ascii)

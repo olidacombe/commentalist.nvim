@@ -6,6 +6,7 @@ local actions = require "telescope.actions"
 local action_state = require "telescope.actions.state"
 
 local commentalist = require("commentalist")
+local fonts = require("commentalist.fonts")
 
 local M = {}
 
@@ -23,7 +24,8 @@ M.fonts = function(opts)
     pickers.new(opts, {
         prompt_title = "fonts",
         finder = finders.new_table {
-            results = commentalist.renderers.figlet,
+            -- results = commentalist.renderers.figlet,
+            results = fonts.all()
         },
         sorter = conf.generic_sorter(opts),
         attach_mappings = function(prompt_bufnr, map)
@@ -61,5 +63,6 @@ M.fonts = function(opts)
         }),
     }):find()
 end
+
 
 return M

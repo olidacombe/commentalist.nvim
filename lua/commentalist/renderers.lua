@@ -1,3 +1,5 @@
+local Job = require("plenary.job")
+
 local M = {
     _renderers = {}
 }
@@ -21,6 +23,19 @@ M.get = function(repr)
     return renderer and function(lines)
         return renderer(lines, font)
     end or noop_renderer
+end
+
+M.shell_render_job = function(cmdline_args, callback)
+    local command = table.remove(cmdline_args, 1)
+    local job = Job:new({
+        command = command,
+        args    = cmdline_args,
+        on_exit = callback and function(j, _)
+            callback(j:result())
+        end
+    })
+    job:start()
+    return job
 end
 
 M.register = function(name, renderer)
