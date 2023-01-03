@@ -1,4 +1,5 @@
 local renderers = require("commentalist.renderers")
+local Fixture = require("tests.fixtures")
 
 describe("split_renderer_repr", function()
     local split_renderer_repr = renderers._split_renderer_repr
@@ -47,5 +48,29 @@ describe("renderers.get", function()
         local renderer = get("test/fonty")
         local lines = { "liney" }
         assert.are.same(renderer(lines), { "fonty:liney" })
+    end)
+end)
+
+-- just test some bits around the "example renderer"
+describe("blocky._comment_char", function()
+    local char = require("commentalist.renderers.blocky")._comment_char
+    it("gets * for .cpp", function()
+        local c = Fixture:new("hello_world.cpp"):bufdo(char)
+        assert.are.same(c, "*")
+    end)
+
+    it("gets # for .sh", function()
+        local c = Fixture:new("ba.sh"):bufdo(char)
+        assert.are.same(c, "#")
+    end)
+
+    it("gets - for .lua", function()
+        local c = Fixture:new("sol.lua"):bufdo(char)
+        assert.are.same(c, "-")
+    end)
+
+    it("gets / for .rs", function()
+        local c = Fixture:new("lib.rs"):bufdo(char)
+        assert.are.same(c, "/")
     end)
 end)
