@@ -1,60 +1,38 @@
 local comment_api = require("Comment.api")
-local Job = require("plenary.job")
+local fonts = require("commentalist.fonts")
+local renderers = require("commentalist.renderers")
+local figlet = require("commentalist.renderers.figlet")
 
-local M = {
+local M = {}
+
+M.defaults = {
     renderers = {
-        figlet = {},
-    },
+        -- blocky = {
+        --     render = function(lines, _)
+        --         return lines
+        --     end
+        --     -- fonts = function({register callback}) -> nil | table | nil
+        -- },
+        figlet = figlet
+    }
 }
 
-local shell_render_job = function(cmdline_args, callback)
-    local command = table.remove(cmdline_args, 1)
-    local job = Job:new({
-        command = command,
-        args    = cmdline_args,
-        on_exit = callback and function(j, _)
-            callback(j:result())
-        end
-    })
-    job:start()
-    return job
-end
+M.setup = function(opts)
+    opts = opts or {}
+    -- TODO condition default renderers on check for binaries
+    -- e.g. if `figlet` or `figlist` aren't in the path then
+    -- don't add a figlet renderer
+    local settings = M.defaults
 
-local filter_figlet_font_list = function(figlist)
-    local fonts_start = false
-    local fonts = {}
-    for _, s in ipairs(figlist) do repeat
-            if s:find("Figlet fonts in this directory:") then
-                fonts_start = true
-                break
-            end
-            if not fonts_start then
-                break
-            end
-            if s:find("Figlet control files in this directory:") then
-                return fonts
-            end
-            table.insert(fonts, s)
-        until true
+    for renderer, renderer_opts in pairs(opts.renderers or {}) do
+        settings.renderers[renderer] = renderer_opts
     end
-    return fonts
-end
 
-M.setup = function()
-    shell_render_job({ "figlist" }, function(figlist)
-        M.renderers.figlet = filter_figlet_font_list(figlist)
-    end)
-end
-
-local figlet = function(string, font)
-    local cmdline_args = { "figlet" }
-    if font then
-        table.insert(cmdline_args, "-f")
-        table.insert(cmdline_args, font)
+    for renderer, opts in pairs(settings.renderers or {}) do
+        local render = assert(opts.render, "no render funtion specified for renderer `" .. renderer .. "`")
+        renderers.register(renderer, render)
+        fonts.register(renderer, opts.fonts)
     end
-    table.insert(cmdline_args, "--")
-    table.insert(cmdline_args, string)
-    return shell_render_job(cmdline_args, nil)
 end
 
 local cursor_stack = function(buf, line, col, callback)
@@ -116,10 +94,13 @@ M.comment = function(opts)
     local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
     lines = table.concat(lines, "\n")
 
-    -- TODO offer all renderers, not just figlet
-    local ascii_render = figlet(lines, font)
+    local ascii_render = renderers.get(font)(lines)
+
+    -- TODO only do this async stuff for a plenary.job
+    -- otherwise, use a sync result for ascii var
     ascii_render:sync()
     local ascii = ascii_render:result()
+
     vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, ascii)
     -- TODO a more robust count of the output lines
     vim.api.nvim_buf_call(bufnr, function()

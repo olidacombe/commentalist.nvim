@@ -19,7 +19,7 @@ end
 function Fixture:comment(args)
     local opts = {
         bufnr = self.buffer,
-        fargs = { "banner" }
+        fargs = { "figlet/banner" }
     }
     for k, v in pairs(args or {}) do
         opts[k] = v
