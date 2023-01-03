@@ -1,18 +1,15 @@
 local comment_api = require("Comment.api")
 local fonts = require("commentalist.fonts")
 local renderers = require("commentalist.renderers")
+
+local blocky = require("commentalist.renderers.blocky")
 local figlet = require("commentalist.renderers.figlet")
 
 local M = {}
 
 M.defaults = {
     renderers = {
-        -- blocky = {
-        --     render = function(lines, _)
-        --         return lines
-        --     end
-        --     -- fonts = function({register callback}) -> nil | table | nil
-        -- },
+        -- blocky = blocky,
         figlet = figlet
     }
 }

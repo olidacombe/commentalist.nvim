@@ -7,7 +7,8 @@ M._clear = function()
 end
 
 local _register_single_font = function(renderer, font)
-    M._fonts[renderer .. "/" .. font] = true
+    local repr = table.concat({ renderer, font }, "/")
+    M._fonts[repr] = true
 end
 
 M.register = function(renderer, registrand)
@@ -21,6 +22,8 @@ M.register = function(renderer, registrand)
     elseif t == "function" then
         -- user has provided a function(register_callback)
         registrand(function(registrand) M.register(renderer, registrand) end)
+    elseif t == "nil" then
+        _register_single_font(renderer, nil)
     end
 end
 
