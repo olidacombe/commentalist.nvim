@@ -23,3 +23,16 @@ describe("comment", function()
         Fixture:new("ba.sh"):comment({ line1 = 5, line2 = 6 }):assert()
     end)
 end)
+
+describe("setup", function()
+    local setup = commentalist.setup
+
+    it("requires renderers entries to have a render method", function()
+        assert.error.matches(function() setup({
+                renderers = {
+                    invalid = {}
+                }
+            })
+        end, "no render funtion specified for renderer `invalid`")
+    end)
+end)
