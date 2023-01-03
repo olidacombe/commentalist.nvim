@@ -22,7 +22,7 @@ local filter_figlet_font_list = function(figlist)
             if s:find("Figlet control files in this directory:") then
                 return fonts
             end
-            table.insert(fonts, "figlet/" .. s)
+            table.insert(fonts, s)
         until true
     end
     return fonts
@@ -41,26 +41,40 @@ end
 
 M.defaults = {
     renderers = {
-        blocky = {
-            render = function(lines, _)
-                return lines
-            end
-            -- fonts = function -> table | table | nil
-        },
+        -- blocky = {
+        --     render = function(lines, _)
+        --         return lines
+        --     end
+        --     -- fonts = function({register callback}) -> nil | table | nil
+        -- },
         -- TODO move to module
         figlet = {
             render = figlet,
-            fonts = M.renderers.figlet
+            fonts = function(register)
+                renderers.shell_render_job({ "figlist" }, function(figlist)
+                    register(filter_figlet_font_list(figlist))
+                end)
+            end
         }
     }
 }
 
 M.setup = function(opts)
-    renderers.register("figlet", figlet)
-    renderers.shell_render_job({ "figlist" }, function(figlist)
-        -- M.renderers.figlet = filter_figlet_font_list(figlist)
-        fonts.register(filter_figlet_font_list(figlist))
-    end)
+    opts = opts or {}
+    -- TODO condition default renderers on check for binaries
+    -- e.g. if `figlet` or `figlist` aren't in the path then
+    -- don't add a figlet renderer
+    local settings = M.defaults
+
+    for renderer, renderer_opts in pairs(opts.renderers or {}) do
+        settings.renderers[renderer] = renderer_opts
+    end
+
+    for renderer, opts in pairs(settings.renderers or {}) do
+        local render = assert(opts.render, "no render funtion specified for renderer `" .. renderer .. "`")
+        renderers.register(renderer, render)
+        fonts.register(renderer, opts.fonts)
+    end
 end
 
 local cursor_stack = function(buf, line, col, callback)

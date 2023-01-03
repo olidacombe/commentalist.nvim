@@ -1,6 +1,11 @@
 local Fixture = require("tests.fixtures")
+local commentalist = require("commentalist")
 
 describe("comment", function()
+    before_each(function()
+        commentalist.setup()
+    end)
+
     it("comments whole buffer by default", function()
         Fixture:new("raw.sh"):comment():assert()
     end)
