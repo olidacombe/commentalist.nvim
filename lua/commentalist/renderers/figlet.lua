@@ -22,7 +22,8 @@ local filter_figlet_font_list = function(figlist)
     return fonts
 end
 
-local figlet = function(string, font)
+local figlet = function(lines, font)
+    local string = table.concat(lines, "\n")
     local cmdline_args = { "figlet" }
     if font then
         table.insert(cmdline_args, "-f")

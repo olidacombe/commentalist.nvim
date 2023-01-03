@@ -4,12 +4,13 @@ local renderers = require("commentalist.renderers")
 
 local blocky = require("commentalist.renderers.blocky")
 local figlet = require("commentalist.renderers.figlet")
+local Job = require("plenary.job")
 
 local M = {}
 
 M.defaults = {
     renderers = {
-        -- blocky = blocky,
+        blocky = blocky,
         figlet = figlet
     }
 }
@@ -89,14 +90,16 @@ M.comment = function(opts)
 
     -- nvim_buf_get_lines Indexing is zero-based, end-exclusive.
     local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
-    lines = table.concat(lines, "\n")
 
     local ascii_render = renderers.get(font)(lines)
 
-    -- TODO only do this async stuff for a plenary.job
-    -- otherwise, use a sync result for ascii var
-    ascii_render:sync()
-    local ascii = ascii_render:result()
+    local ascii = ascii_render
+    -- in the case where our renderer has returned a plenary.job,
+    -- wait for it to finish and get the result
+    if getmetatable(ascii_render) == Job then
+        ascii_render:sync()
+        ascii = ascii_render:result()
+    end
 
     vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, ascii)
     -- TODO a more robust count of the output lines
