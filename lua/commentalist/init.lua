@@ -2,16 +2,15 @@ local comment_api = require("Comment.api")
 local fonts = require("commentalist.fonts")
 local renderers = require("commentalist.renderers")
 
-local blocky = require("commentalist.renderers.blocky")
-local figlet = require("commentalist.renderers.figlet")
 local Job = require("plenary.job")
 
 local M = {}
 
 M.defaults = {
     renderers = {
-        blocky = blocky,
-        figlet = figlet
+        blocky = require "commentalist.renderers.blocky",
+        boxes = require "commentalist.renderers.boxes",
+        figlet = require "commentalist.renderers.figlet"
     }
 }
 
