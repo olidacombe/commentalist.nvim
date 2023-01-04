@@ -10,6 +10,7 @@ M.defaults = {
     renderers = {
         blocky = require "commentalist.renderers.blocky",
         boxes = require "commentalist.renderers.boxes",
+        cowsay = require "commentalist.renderers.cowsay",
         figlet = require "commentalist.renderers.figlet"
     }
 }
