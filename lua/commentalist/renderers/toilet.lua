@@ -8,7 +8,7 @@ M.render = function(lines, font)
 end
 
 M.fonts = function(register)
-    -- TODO
+    -- TODO, non-OSX variants
     -- ls $(brew --prefix toilet)/share/figlet | sed 's/\.[ft]lf$//'
 end
 

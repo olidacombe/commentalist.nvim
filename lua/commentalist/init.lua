@@ -1,26 +1,36 @@
 local comment_api = require("Comment.api")
 local fonts = require("commentalist.fonts")
 local renderers = require("commentalist.renderers")
+local installed_packages = require("commentalist.health").installed_packages
+
 
 local Job = require("plenary.job")
 
 local M = {}
 
-M.defaults = {
-    renderers = {
-        blocky = require "commentalist.renderers.blocky",
-        boxes = require "commentalist.renderers.boxes",
-        cowsay = require "commentalist.renderers.cowsay",
-        figlet = require "commentalist.renderers.figlet"
+M.defaults = function()
+    local defaults = {
+        renderers = {
+            blocky = require "commentalist.renderers.blocky",
+            -- boxes = require "commentalist.renderers.boxes",
+            -- cowsay = require "commentalist.renderers.cowsay",
+            -- figlet = require "commentalist.renderers.figlet"
+        }
     }
-}
+
+    for _, renderer in ipairs(installed_packages()) do
+        defaults.renderers[renderer] = require("commentalist.renderers." .. renderer)
+    end
+
+    return defaults
+end
 
 M.setup = function(opts)
     opts = opts or {}
     -- TODO condition default renderers on check for binaries
     -- e.g. if `figlet` or `figlist` aren't in the path then
     -- don't add a figlet renderer
-    local settings = M.defaults
+    local settings = M.defaults()
 
     for renderer, renderer_opts in pairs(opts.renderers or {}) do
         settings.renderers[renderer] = renderer_opts

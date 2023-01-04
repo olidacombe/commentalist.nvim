@@ -39,6 +39,17 @@ M.check_binaries = function(bin)
     return ok
 end
 
+-- return which optional binary packages have been found present
+M.installed_packages = function()
+    local packages = {}
+    for bin, _ in pairs(optional_binaries) do
+        if M.check_binaries(bin) then
+            table.insert(packages, bin)
+        end
+    end
+    return packages
+end
+
 -- use check_binaries for all in `optional_binaries` to generate
 -- a healthcheck report
 local bin_report = function()
