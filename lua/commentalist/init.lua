@@ -1,28 +1,36 @@
 local comment_api = require("Comment.api")
 local fonts = require("commentalist.fonts")
 local renderers = require("commentalist.renderers")
-local figlet = require("commentalist.renderers.figlet")
+local installed_packages = require("commentalist.health").installed_packages
+
+
+local Job = require("plenary.job")
 
 local M = {}
 
-M.defaults = {
-    renderers = {
-        -- blocky = {
-        --     render = function(lines, _)
-        --         return lines
-        --     end
-        --     -- fonts = function({register callback}) -> nil | table | nil
-        -- },
-        figlet = figlet
+M.defaults = function()
+    local defaults = {
+        renderers = {
+            blocky = require "commentalist.renderers.blocky",
+            -- boxes = require "commentalist.renderers.boxes",
+            -- cowsay = require "commentalist.renderers.cowsay",
+            -- figlet = require "commentalist.renderers.figlet"
+        }
     }
-}
+
+    for _, renderer in ipairs(installed_packages()) do
+        defaults.renderers[renderer] = require("commentalist.renderers." .. renderer)
+    end
+
+    return defaults
+end
 
 M.setup = function(opts)
     opts = opts or {}
     -- TODO condition default renderers on check for binaries
     -- e.g. if `figlet` or `figlist` aren't in the path then
     -- don't add a figlet renderer
-    local settings = M.defaults
+    local settings = M.defaults()
 
     for renderer, renderer_opts in pairs(opts.renderers or {}) do
         settings.renderers[renderer] = renderer_opts
@@ -92,14 +100,16 @@ M.comment = function(opts)
 
     -- nvim_buf_get_lines Indexing is zero-based, end-exclusive.
     local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
-    lines = table.concat(lines, "\n")
 
     local ascii_render = renderers.get(font)(lines)
 
-    -- TODO only do this async stuff for a plenary.job
-    -- otherwise, use a sync result for ascii var
-    ascii_render:sync()
-    local ascii = ascii_render:result()
+    local ascii = ascii_render
+    -- in the case where our renderer has returned a plenary.job,
+    -- wait for it to finish and get the result
+    if getmetatable(ascii_render) == Job then
+        ascii_render:sync()
+        ascii = ascii_render:result()
+    end
 
     vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, ascii)
     -- TODO a more robust count of the output lines

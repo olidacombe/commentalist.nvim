@@ -28,6 +28,15 @@ function Fixture:comment(args)
     return CommentedFixture:new(self)
 end
 
+function Fixture:bufdo(fn)
+    -- execute fn() in buffer
+    local ret = nil
+    vim.api.nvim_buf_call(self.buffer, function()
+        ret = fn()
+    end)
+    return ret
+end
+
 function CommentedFixture:new(o)
     o = o or {}
     setmetatable(o, self)
