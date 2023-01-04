@@ -7,6 +7,7 @@ This plugin aims to trivialize the making of bombastic ascii comments.
 Currently supporting the following engines:
 
 + boxes
++ cowsay
 + figlet
 
 ## Dependencies
@@ -14,6 +15,7 @@ Currently supporting the following engines:
 + [Comment.nvim](https://github.com/numToStr/Comment.nvim)
 + [telescope](https://github.com/nvim-telescope/telescope.nvim)
 + boxes (optional)
++ cowsay (optional)
 + figlet (optional)
 
 ## Installation
