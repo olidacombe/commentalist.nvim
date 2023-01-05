@@ -106,7 +106,7 @@ M.comment = function(opts)
     local ascii = ascii_render
     -- in the case where our renderer has returned a plenary.job,
     -- wait for it to finish and get the result
-    if getmetatable(ascii_render) == Job then
+    if Job.is_job(ascii_render) then
         ascii_render:sync()
         ascii = ascii_render:result()
     end

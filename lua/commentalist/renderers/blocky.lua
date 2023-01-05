@@ -1,3 +1,28 @@
+--
+-- _|        _|                      _|
+-- _|_|_|    _|    _|_|      _|_|_|  _|  _|    _|    _|
+-- _|    _|  _|  _|    _|  _|        _|_|      _|    _|
+-- _|    _|  _|  _|    _|  _|        _|  _|    _|    _|
+-- _|_|_|    _|    _|_|      _|_|_|  _|    _|    _|_|_|
+--                                                   _|
+--                                               _|_|
+--
+-- This is an example of a simple no-font renderer you
+-- might write.
+--
+-- Enable with
+-- ```lua
+-- require("commentalist").setup({
+--     renderers = {
+--         blocky = require"commentalist.renderers.blocky"
+--     }
+-- })
+-- ```
+--
+-- And `blocky` should become available in your rendeder
+-- list when running `:Commentalist`.  Notice you're not
+-- offered any fonts.
+
 local M = {}
 
 M._comment_char = function()

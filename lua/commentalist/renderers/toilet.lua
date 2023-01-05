@@ -1,5 +1,3 @@
-local shell_render_job = require("commentalist.renderers").shell_render_job
-
 local M = {}
 
 M.render = function(lines, font)
