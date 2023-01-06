@@ -31,10 +31,13 @@ M.setup = function(opts)
         settings.renderers[renderer] = renderer_opts
     end
 
-    for renderer, opts in pairs(settings.renderers or {}) do
-        local render = assert(opts.render, "no render funtion specified for renderer `" .. renderer .. "`")
-        renderers.register(renderer, render)
-        fonts.register(renderer, opts.fonts)
+    for renderer, opts in pairs(settings.renderers or {}) do repeat
+            -- check if renderer has been explicitly disabled
+            if not opts then break end
+            local render = assert(opts.render, "no render funtion specified for renderer `" .. renderer .. "`")
+            renderers.register(renderer, render)
+            fonts.register(renderer, opts.fonts)
+        until true
     end
 end
 

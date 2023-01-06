@@ -10,6 +10,7 @@ Currently supporting the following engines:
 + cowsay
 + figlet
 
+
 ## Dependencies
 
 + [Comment.nvim](https://github.com/numToStr/Comment.nvim)
@@ -17,6 +18,7 @@ Currently supporting the following engines:
 + boxes (optional)
 + cowsay (optional)
 + figlet (optional)
+
 
 ## Installation
 
@@ -41,6 +43,15 @@ require("commentalist").setup()
 -- optionally add a keymap
 vim.keymap.set({ "n", "v" }, "<leader>mm", ":Commentalist<CR>")
 ```
+
+# Usage
+
+Use the command `:Commentalist` to bring up a telescope previewer allowing
+you to browse the output you can expect.
+
+Or if you already know which `{renderer}/{font}` you want to apply to a range, call with
+the font as an argument, `:Commentalist {renderer}/{font}`.
+
 
 ### Custom Renderers
 
@@ -86,14 +97,34 @@ And it must return either:
 - a table of strings, each containing no newlines
 - a _started_ [plenary.job](https://github.com/nvim-lua/plenary.nvim/blob/master/lua/plenary/job.lua) which will return such a table of strings
 
+
+## Disable default renderer
+
+If a default renderer's binaries are detected, the renderer will be made available automatically.  If you don't want that, disable the renderer
+during setup, e.g.
+
+```lua
+require("commentalist").setup({
+    renderers = {
+		-- you have cowsay installed but don't want to use it with this plugin
+		cowsay = false
+	}
+})
+```
+
 ## checkhealth
 
-TODO
+The healthcheck can be invoked with `:checkhealth commentalist`.  Any default renderers detected which are not disabled through setup
+will result in all fonts becoming available via telescope.
 
-# Usage
+```
+## Checking for required plugins
+  - OK: plenary installed.
+  - OK: telescope installed.
 
-Use the command `:Commentalist` to bring up a telescope previewer allowing
-you to browse the output you can expect.
-
-Or if you already know which `{renderer}/{font}` you want to apply to a range, call with
-the font as an argument, `:Commentalist {renderer}/{font}`.
+## Checking for default renderers
+  - OK: `figlet` found
+  - OK: `figlist` found
+  - OK: `boxes` found
+  - OK: `cowsay` found
+```

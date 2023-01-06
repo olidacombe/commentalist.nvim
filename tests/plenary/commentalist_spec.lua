@@ -26,6 +26,11 @@ end)
 
 describe("setup", function()
     local setup = commentalist.setup
+    local renderers = require("commentalist.renderers")._renderers
+
+    local clear_renderers = function()
+        for k, _ in pairs(renderers) do renderers[k] = nil end
+    end
 
     it("requires renderers entries to have a render method", function()
         assert.error.matches(function() setup({
@@ -34,5 +39,18 @@ describe("setup", function()
                 }
             })
         end, "no render funtion specified for renderer `invalid`")
+    end)
+
+    it("disables renderers via setup", function()
+        clear_renderers()
+        setup()
+        assert(renderers["cowsay"])
+        clear_renderers()
+        setup({
+            renderers = {
+                cowsay = false
+            }
+        })
+        assert.are.same(renderers["cowsay"], nil)
     end)
 end)
