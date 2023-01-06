@@ -1,8 +1,8 @@
-local shell_render_job = require("commentalist.renderers").shell_render_job
+local Job = require("plenary.job")
 
 local M = {}
 
-local filter_figlet_font_list = function(figlist)
+local filter_fonts = function(figlist)
     local fonts_start = false
     local fonts = {}
     for _, s in ipairs(figlist) do repeat
@@ -22,23 +22,28 @@ local filter_figlet_font_list = function(figlist)
     return fonts
 end
 
-local figlet = function(lines, font)
-    local string = table.concat(lines, "\n")
-    local cmdline_args = { "figlet" }
+M.render = function(lines, font)
+    local args = {}
     if font then
-        table.insert(cmdline_args, "-f")
-        table.insert(cmdline_args, font)
+        table.insert(args, "-f")
+        table.insert(args, font)
     end
-    table.insert(cmdline_args, "--")
-    table.insert(cmdline_args, string)
-    return shell_render_job(cmdline_args, nil)
+    local job = Job:new({
+        command = "figlet",
+        args = args,
+        writer = lines,
+    })
+    job:start()
+    return job
 end
 
-M.render = figlet
 M.fonts = function(register)
-    shell_render_job({ "figlist" }, function(figlist)
-        register(filter_figlet_font_list(figlist))
-    end)
+    Job:new({
+        command = "figlist",
+        on_exit = function(j, _)
+            register(filter_fonts(j:result()))
+        end,
+    }):start()
 end
 
 return M

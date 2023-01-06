@@ -84,7 +84,7 @@ Your `render` function takes as arguments:
 And it must return either:
 
 - a table of strings, each containing no newlines
-- a [plenary.job](https://github.com/nvim-lua/plenary.nvim/blob/master/lua/plenary/job.lua) which will return such a table of strings
+- a _started_ [plenary.job](https://github.com/nvim-lua/plenary.nvim/blob/master/lua/plenary/job.lua) which will return such a table of strings
 
 ## checkhealth
 

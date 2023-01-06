@@ -10,12 +10,7 @@ local M = {}
 
 M.defaults = function()
     local defaults = {
-        renderers = {
-            blocky = require "commentalist.renderers.blocky",
-            -- boxes = require "commentalist.renderers.boxes",
-            -- cowsay = require "commentalist.renderers.cowsay",
-            -- figlet = require "commentalist.renderers.figlet"
-        }
+        renderers = {}
     }
 
     for _, renderer in ipairs(installed_packages()) do
@@ -106,8 +101,8 @@ M.comment = function(opts)
     local ascii = ascii_render
     -- in the case where our renderer has returned a plenary.job,
     -- wait for it to finish and get the result
-    if getmetatable(ascii_render) == Job then
-        ascii_render:sync()
+    if Job.is_job(ascii_render) then
+        ascii_render:wait()
         ascii = ascii_render:result()
     end
 
