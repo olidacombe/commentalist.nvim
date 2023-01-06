@@ -65,7 +65,30 @@ local bin_report = function()
     end
 end
 
+local function lualib_installed(lib_name)
+    local res, _ = pcall(require, lib_name)
+    return res
+end
+
+local required_plugins = {
+    { lib = "plenary", optional = false, },
+    { lib = "telescope", optional = false, },
+}
+
 M.check = function()
+    health.report_start "Checking for required plugins"
+    for _, plugin in ipairs(required_plugins) do
+        if lualib_installed(plugin.lib) then
+            health.report_ok(plugin.lib .. " installed.")
+        else
+            local lib_not_installed = plugin.lib .. " not found."
+            if plugin.optional then
+                health.report_warn(("%s %s"):format(lib_not_installed, plugin.info))
+            else
+                health.report_error(lib_not_installed)
+            end
+        end
+    end
     health.report_start "Checking for default renderers"
     bin_report()
 end
