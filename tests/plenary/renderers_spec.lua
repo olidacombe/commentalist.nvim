@@ -1,23 +1,23 @@
-local renderers = require("commentalist.renderers")
-local Fixture = require("tests.fixtures")
+local renderers = require "commentalist.renderers"
+local Fixture = require "tests.fixtures"
 
 describe("split_renderer_repr", function()
     local split_renderer_repr = renderers._split_renderer_repr
 
     it("splits `figlet/banner` to `figlet`, `banner`", function()
-        local r, f = split_renderer_repr("figlet/banner")
+        local r, f = split_renderer_repr "figlet/banner"
         assert.are.same(r, "figlet")
         assert.are.same(f, "banner")
     end)
 
     it("splits `rendy/font/with/slashes` to `rendy`, `font/with/slashes`", function()
-        local r, f = split_renderer_repr("rendy/font/with/slashes")
+        local r, f = split_renderer_repr "rendy/font/with/slashes"
         assert.are.same(r, "rendy")
         assert.are.same(f, "font/with/slashes")
     end)
 
     it("splits `rendy` to `rendy`, nil (for renderers without fonts)", function()
-        local r, f = split_renderer_repr("rendy")
+        local r, f = split_renderer_repr "rendy"
         assert.are.same(r, "rendy")
         assert.are.same(f, nil)
     end)
@@ -38,14 +38,14 @@ describe("renderers.get", function()
     end)
 
     it("returns a no-op renderer on miss", function()
-        local renderer = get("miss")
+        local renderer = get "miss"
         assert.are.not_same(renderer, nil)
         local lines = { "untouched" }
         assert.are.same(renderer(lines), { "untouched" })
     end)
 
     it("curries the font", function()
-        local renderer = get("test/fonty")
+        local renderer = get "test/fonty"
         local lines = { "liney" }
         assert.are.same(renderer(lines), { "fonty:liney" })
     end)

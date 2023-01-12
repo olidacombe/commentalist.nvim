@@ -1,5 +1,5 @@
 local M = {
-    _fonts = {}
+    _fonts = {},
 }
 
 M._clear = function()
@@ -21,7 +21,9 @@ M.register = function(renderer, registrand)
         end
     elseif t == "function" then
         -- user has provided a function(register_callback)
-        registrand(function(r) M.register(renderer, r) end)
+        registrand(function(r)
+            M.register(renderer, r)
+        end)
     elseif t == "nil" then
         _register_single_font(renderer, nil)
     end

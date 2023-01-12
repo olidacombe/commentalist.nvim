@@ -54,7 +54,7 @@ end
 -- a healthcheck report
 local bin_report = function()
     for name, extra in pairs(optional_binaries) do
-        local _, findings = check_binaries({ name, table.unpack(extra) })
+        local _, findings = check_binaries { name, table.unpack(extra) }
         for bin, found in pairs(findings) do
             if found then
                 health.report_ok(("`%s` found"):format(bin))
@@ -71,8 +71,8 @@ local function lualib_installed(lib_name)
 end
 
 local required_plugins = {
-    { lib = "plenary", optional = false, },
-    { lib = "telescope", optional = false, },
+    { lib = "plenary", optional = false },
+    { lib = "telescope", optional = false },
 }
 
 M.check = function()

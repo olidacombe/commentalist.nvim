@@ -8,5 +8,5 @@
 --
 
 function moon()
-    print("moon")
+    print "moon"
 end

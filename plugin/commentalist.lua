@@ -1,4 +1,4 @@
-local commentalist = require("commentalist")
+local commentalist = require "commentalist"
 
 vim.api.nvim_create_user_command("Commentalist", function(opts)
     opts["bufnr"] = vim.api.nvim_get_current_buf()

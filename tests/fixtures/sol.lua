@@ -1,5 +1,5 @@
 -- sol.lua
 
 function moon()
-    print("moon")
+    print "moon"
 end

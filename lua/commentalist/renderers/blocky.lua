@@ -28,7 +28,7 @@ local M = {}
 M._comment_char = function()
     local commentstring = vim.bo.commentstring
     commentstring = commentstring:gsub("%s*%%s.*", "")
-    local _, _, c = commentstring:find("(.)$")
+    local _, _, c = commentstring:find "(.)$"
     return c
 end
 

@@ -1,13 +1,13 @@
-local Job = require("plenary.job")
+local Job = require "plenary.job"
 
 local M = {}
 
 M.render = function(lines, font)
-    local job = Job:new({
+    local job = Job:new {
         command = "cowsay",
         args = { "-f", font },
         writer = lines,
-    })
+    }
     job:start()
     return job
 end
@@ -18,7 +18,7 @@ local filter_fonts = function(lines)
     for i, line in ipairs(lines) do
         -- we only want to skip the first line
         if i > 1 then
-            for font in string.gmatch(line, '%S+') do
+            for font in string.gmatch(line, "%S+") do
                 table.insert(fonts, font)
             end
         end

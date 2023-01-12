@@ -1,13 +1,13 @@
-local Job = require("plenary.job")
+local Job = require "plenary.job"
 
 local M = {}
 
 M.render = function(lines, font)
-    local job = Job:new({
+    local job = Job:new {
         command = "boxes",
         args = { "-a", "hcvc", "-d", font },
         writer = lines,
-    })
+    }
     job:start()
     return job
 end
@@ -18,7 +18,7 @@ local filter_fonts = function(lines)
     local next = nil
     local skip = false
     for i, line in ipairs(lines) do
-        if i > 2 and line:find('^[^%s]') then
+        if i > 2 and line:find "^[^%s]" then
             if not skip then
                 -- inserting nil has no effect :)
                 table.insert(ret, next)

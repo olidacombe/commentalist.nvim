@@ -1,5 +1,5 @@
 local M = {
-    _renderers = {}
+    _renderers = {},
 }
 
 local noop_renderer = function(lines)
@@ -9,8 +9,10 @@ end
 -- Takes a renderer/font repr and returns
 -- renderer_name (string), font (string)
 M._split_renderer_repr = function(repr)
-    local _, _, renderer, font = repr:find("([^/]*)/?(.*)")
-    if font == "" then font = nil end
+    local _, _, renderer, font = repr:find "([^/]*)/?(.*)"
+    if font == "" then
+        font = nil
+    end
     return renderer, font
 end
 

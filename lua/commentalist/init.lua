@@ -1,16 +1,15 @@
-local comment_api = require("Comment.api")
-local fonts = require("commentalist.fonts")
-local renderers = require("commentalist.renderers")
+local comment_api = require "Comment.api"
+local fonts = require "commentalist.fonts"
+local renderers = require "commentalist.renderers"
 local installed_packages = require("commentalist.health").installed_packages
 
-
-local Job = require("plenary.job")
+local Job = require "plenary.job"
 
 local M = {}
 
 M.defaults = function()
     local defaults = {
-        renderers = {}
+        renderers = {},
     }
 
     for _, renderer in ipairs(installed_packages()) do
@@ -31,9 +30,12 @@ M.setup = function(o)
         settings.renderers[renderer] = renderer_opts
     end
 
-    for renderer, ropts in pairs(settings.renderers or {}) do repeat
+    for renderer, ropts in pairs(settings.renderers or {}) do
+        repeat
             -- check if renderer has been explicitly disabled
-            if not ropts then break end
+            if not ropts then
+                break
+            end
             local render = assert(ropts.render, "no render funtion specified for renderer `" .. renderer .. "`")
             renderers.register(renderer, render)
             fonts.register(renderer, ropts.fonts)

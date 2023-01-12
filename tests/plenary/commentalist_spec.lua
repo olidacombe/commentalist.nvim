@@ -1,5 +1,5 @@
-local Fixture = require("tests.fixtures")
-local commentalist = require("commentalist")
+local Fixture = require "tests.fixtures"
+local commentalist = require "commentalist"
 
 describe("comment", function()
     before_each(function()
@@ -29,15 +29,18 @@ describe("setup", function()
     local renderers = require("commentalist.renderers")._renderers
 
     local clear_renderers = function()
-        for k, _ in pairs(renderers) do renderers[k] = nil end
+        for k, _ in pairs(renderers) do
+            renderers[k] = nil
+        end
     end
 
     it("requires renderers entries to have a render method", function()
-        assert.error.matches(function() setup({
+        assert.error.matches(function()
+            setup {
                 renderers = {
-                    invalid = {}
-                }
-            })
+                    invalid = {},
+                },
+            }
         end, "no render funtion specified for renderer `invalid`")
     end)
 
@@ -46,11 +49,11 @@ describe("setup", function()
         setup()
         assert(renderers["cowsay"])
         clear_renderers()
-        setup({
+        setup {
             renderers = {
-                cowsay = false
-            }
-        })
+                cowsay = false,
+            },
+        }
         assert.are.same(renderers["cowsay"], nil)
     end)
 end)

@@ -1,4 +1,4 @@
-local fonts = require("commentalist.fonts")
+local fonts = require "commentalist.fonts"
 
 describe("register", function()
     local register = fonts.register
