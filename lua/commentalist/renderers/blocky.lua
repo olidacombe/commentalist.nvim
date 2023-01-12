@@ -40,7 +40,7 @@ M.render = function(lines, _)
     end
     local c = M._comment_char()
     local head_tail = string.rep(c, n + 2)
-    ret = { head_tail }
+    local ret = { head_tail }
     for _, line in ipairs(lines) do
         table.insert(ret, line .. string.rep(" ", n + 1 - line:len()) .. c)
     end

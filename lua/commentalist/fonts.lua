@@ -21,7 +21,7 @@ M.register = function(renderer, registrand)
         end
     elseif t == "function" then
         -- user has provided a function(register_callback)
-        registrand(function(registrand) M.register(renderer, registrand) end)
+        registrand(function(r) M.register(renderer, r) end)
     elseif t == "nil" then
         _register_single_font(renderer, nil)
     end

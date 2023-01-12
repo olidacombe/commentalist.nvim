@@ -53,8 +53,8 @@ end
 -- use check_binaries for all in `optional_binaries` to generate
 -- a healthcheck report
 local bin_report = function()
-    for bin, extra in pairs(optional_binaries) do
-        local _, findings = check_binaries({ bin, table.unpack(extra) })
+    for name, extra in pairs(optional_binaries) do
+        local _, findings = check_binaries({ name, table.unpack(extra) })
         for bin, found in pairs(findings) do
             if found then
                 health.report_ok(("`%s` found"):format(bin))

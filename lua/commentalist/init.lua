@@ -20,8 +20,8 @@ M.defaults = function()
     return defaults
 end
 
-M.setup = function(opts)
-    opts = opts or {}
+M.setup = function(o)
+    local opts = o or {}
     -- TODO condition default renderers on check for binaries
     -- e.g. if `figlet` or `figlist` aren't in the path then
     -- don't add a figlet renderer
@@ -31,12 +31,12 @@ M.setup = function(opts)
         settings.renderers[renderer] = renderer_opts
     end
 
-    for renderer, opts in pairs(settings.renderers or {}) do repeat
+    for renderer, ropts in pairs(settings.renderers or {}) do repeat
             -- check if renderer has been explicitly disabled
-            if not opts then break end
-            local render = assert(opts.render, "no render funtion specified for renderer `" .. renderer .. "`")
+            if not ropts then break end
+            local render = assert(ropts.render, "no render funtion specified for renderer `" .. renderer .. "`")
             renderers.register(renderer, render)
-            fonts.register(renderer, opts.fonts)
+            fonts.register(renderer, ropts.fonts)
         until true
     end
 end
@@ -72,8 +72,8 @@ local comment = function(line1, line2)
     end)
 end
 
-M.comment = function(opts)
-    opts = opts or {}
+M.comment = function(o)
+    local opts = o or {}
     -- get variables
     opts.bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
     local fargs = opts.fargs or {}
