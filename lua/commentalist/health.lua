@@ -57,9 +57,9 @@ local bin_report = function()
 		local _, findings = check_binaries({ bin, table.unpack(extra) })
 		for bin, found in pairs(findings) do
 			if found then
-				health.report_ok(("`%s` found"):format(bin))
+				health.ok(("`%s` found"):format(bin))
 			else
-				health.report_warn(("`%s` not found"):format(bin))
+				health.warn(("`%s` not found"):format(bin))
 			end
 		end
 	end
@@ -79,13 +79,13 @@ M.check = function()
 	health.start("Checking for required plugins")
 	for _, plugin in ipairs(required_plugins) do
 		if lualib_installed(plugin.lib) then
-			health.report_ok(plugin.lib .. " installed.")
+			health.ok(plugin.lib .. " installed.")
 		else
 			local lib_not_installed = plugin.lib .. " not found."
 			if plugin.optional then
-				health.report_warn(("%s %s"):format(lib_not_installed, plugin.info))
+				health.warn(("%s %s"):format(lib_not_installed, plugin.info))
 			else
-				health.report_error(lib_not_installed)
+				health.error(lib_not_installed)
 			end
 		end
 	end
